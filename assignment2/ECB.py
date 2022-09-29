@@ -20,14 +20,14 @@ def write_image(data):
 
 
 def encrypt_block(data, key):
-    if type(data) != bytes:
-        data = data.encode('UTF-8')
+    if type(data) != bytes:             # checks if data is already bytes
+        data = data.encode('UTF-8')     # converts data to bytes
     cipher = AES.new(key, AES.MODE_ECB)
     ct_bytes = cipher.encrypt(pad(data, AES.block_size))
     ct = b64encode(ct_bytes).decode('utf-8')
     result = json.dumps({'ciphertext': ct})
     print(result)
-    return (result)
+    return result
 
 
 def decrypt_block(json_input, key):
@@ -41,11 +41,16 @@ def decrypt_block(json_input, key):
         print("Incorrect decryption")
 
 
+def encrypt_decrypt_block(data, key):
+    jsonCt = encrypt_block(data, key)
+    decrypt_block(jsonCt, key)
+
+
 if __name__ == '__main__':
     img = read_image()
     img_header = img[0:54]
     key = get_random_bytes(16)
-    text = input("input a string to encrypt: ")
-    data = text # b"secret"
-    jsonCt = encrypt_block(data, key)
-    decrypt_block(jsonCt, key)
+    inText = input("input a string to encrypt: ")
+    data = inText
+    encrypt_decrypt_block(data, key)
+
