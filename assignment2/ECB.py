@@ -47,6 +47,7 @@ if __name__ == '__main__':
     img = read_image()
     img_header = img[0:54]
     key = get_random_bytes(16)
+    
     # text = input("input a string to encrypt: ")
     data = b"secret"
     jsonCt = encrypt_text(data, key)
