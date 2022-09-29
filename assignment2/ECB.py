@@ -17,8 +17,7 @@ from Crypto.Util.Padding import unpad
 #     im.save("ECB_encrypted.jpeg")
 
 
-def encrypt_text(key):
-    data = b"secret"
+def encrypt_text(data, key):
     cipher = AES.new(key, AES.MODE_ECB)
     ct_bytes = cipher.encrypt(pad(data, AES.block_size))
     ct = b64encode(ct_bytes).decode('utf-8')
@@ -45,5 +44,6 @@ def decrypt_text(json_input, key):
 if __name__ == '__main__':
     key = get_random_bytes(16)
     # text = input("input a string to encrypt: ")
-    jsonCt = encrypt_text(key)
+    data = b"secret"
+    jsonCt = encrypt_text(data, key)
     decrypt_text(jsonCt, key)
