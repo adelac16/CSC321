@@ -14,5 +14,6 @@ def write_image(data):
 
 if __name__ == '__main__':
     img = read_image()
-    img_header = img[0:14] #header is in this portion of bytes
+    img_header = img[0:54] #header is in this portion of bytes, 138 if 54 doesn't work
+    print(img_header)
     #write_image(img)
