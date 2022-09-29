@@ -1,5 +1,3 @@
-# from PIL import Image
-# import numpy as np
 import json
 from base64 import b64encode
 from Crypto.Cipher import AES
@@ -7,14 +5,6 @@ from Crypto.Util.Padding import pad
 from Crypto.Random import get_random_bytes
 from base64 import b64decode
 from Crypto.Util.Padding import unpad
-
-# def read_image():
-#     img_arr = Image.open('./mustang.bmp')
-#     img_arr = np.array(Image.open('./mustang.bmp'))
-#     return img_arr
-#
-# def write_image(img_arr):
-#     im.save("ECB_encrypted.jpeg")
 
 
 def encrypt_text(data, key):
