@@ -26,7 +26,6 @@ def encrypt_block(data, key):
     ct_bytes = cipher.encrypt(pad(data, AES.block_size))
     ct = b64encode(ct_bytes).decode('utf-8')
     result = json.dumps({'ciphertext': ct})
-    print(result)
     return result
 
 
@@ -46,11 +45,28 @@ def encrypt_decrypt_block(data, key):
     decrypt_block(jsonCt, key)
 
 
+def encrypt_img(header, body, key):
+    n = 16 # chunk length
+    #split image into blocks
+    blocks = [body[i:i+n] for i in range(0, len(body), n)]
+    #encrypt one block at a time & append to header
+    encrypted = header
+    for block in blocks:
+        encrypted += bytes(encrypt_block(block, key), 'utf-8')
+    print(encrypted)
+
 if __name__ == '__main__':
     img = read_image()
     img_header = img[0:54]
+    img_body = img[54:]
     key = get_random_bytes(16)
-    inText = input("input a string to encrypt: ")
-    data = inText
-    encrypt_decrypt_block(data, key)
+
+    encryped = encrypt_img(img_header, img_body, key)
+
+    print(encryped)
+
+    #write_image(encryped)
+    #inText = input("input a string to encrypt: ")
+    #data = inText
+    #encrypt_decrypt_block(data, key)
 
