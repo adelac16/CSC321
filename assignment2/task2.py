@@ -29,6 +29,8 @@ def byte_xor(ba1, ba2):
 def encrypt_block(data, key, vector):
     if type(data) != bytes:             # checks if data is already bytes
         data = data.encode('UTF-8')     # converts data to bytes
+    if len(data) < 16:
+        data = pad(data, 16)
     data = byte_xor(data, vector)       # xor vector and data
     cipher = AES.new(key, AES.MODE_ECB)
     ct_bytes = cipher.encrypt(data)     # encrypts block
@@ -40,8 +42,6 @@ def CBC_encrypt(body, key, IV):
     n = 16  # chunk length
     blocks = [body[i:i + n] for i in range(0, len(body), n)]
     for block in blocks:
-        if len(block) < 16:
-            block = pad(block, 16)
         enc_block = encrypt_block(block, key, IV)
         IV = enc_block
         enc += enc_block
