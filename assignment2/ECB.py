@@ -34,7 +34,6 @@ def write_image(data):
     file.write(data)
     file.close()
 
-
 def encrypt_block(data, key):
     if type(data) != bytes:             # checks if data is already bytes
         data = data.encode('UTF-8')     # converts data to bytes
