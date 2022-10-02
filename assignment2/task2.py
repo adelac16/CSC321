@@ -29,11 +29,9 @@ def byte_xor(ba1, ba2):
 def encrypt_block(data, key, vector):
     if type(data) != bytes:             # checks if data is already bytes
         data = data.encode('UTF-8')     # converts data to bytes
-    if len(data) < 16:
-        data = pad(data, 16)
     data = byte_xor(data, vector)       # xor vector and data
     cipher = AES.new(key, AES.MODE_ECB)
-    ct_bytes = cipher.encrypt(pad(data, AES.block_size))
+    ct_bytes = cipher.encrypt(data)     # encrypts block
     return ct_bytes
 
 
@@ -55,6 +53,7 @@ def decrypt_block(ct, key, vector):
         cipher = AES.new(key, AES.MODE_ECB)
         pt = cipher.decrypt(ct)
         pt = byte_xor(pt, vector)
+        pt = unpad(pt, 16)
         # print("The message was: ", pt)
         return pt
     except (ValueError, KeyError):

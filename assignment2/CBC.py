@@ -23,7 +23,7 @@ def encrypt_block(data, key):
     if type(data) != bytes:             # checks if data is already bytes
         data = data.encode('UTF-8')     # converts data to bytes
     cipher = AES.new(key, AES.MODE_ECB)
-    ct_bytes = cipher.encrypt(pad(data, AES.block_size))
+    ct_bytes = cipher.encrypt(data)
     ct = b64encode(ct_bytes).decode('utf-8')
     result = json.dumps({'ciphertext': ct})
     return result.encode('UTF-8')
