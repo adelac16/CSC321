@@ -29,26 +29,25 @@ def read_image():
     return data
 
 def write_image(data):
+    print('writing image')
     file = open("ECB_encrypted.bmp", "wb")
     file.write(data)
     file.close()
 
-
 def encrypt_block(data, key):
     if type(data) != bytes:             # checks if data is already bytes
         data = data.encode('UTF-8')     # converts data to bytes
+    if len(block)<16:                   # checks for incomplete block
+            block = pad(block, 16, style='pkcs7')   # pads
     cipher = AES.new(key, AES.MODE_ECB)
     ct_bytes = cipher.encrypt(data)
     return ct_bytes
 
-
-def encrypt_img(header, body, key):
+def encrypt_img(header, body, key): 
     enc_img = b''
     n = 16 # chunk length
     blocks = [body[i:i+n] for i in range(0, len(body), n)]
     for block in blocks:
-        if len(block)<16:
-            block = pad(block, 16)
         enc_block = encrypt_block(block, key)
         enc_img += enc_block
     return (header + enc_img)
@@ -63,6 +62,5 @@ if __name__ == '__main__':
     # encrypt
     enc_img = encrypt_img(header, body, key)
     # write to result
-    print('writing image')
     write_image(enc_img)
 
