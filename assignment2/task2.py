@@ -91,6 +91,16 @@ def full_message(msg):
     return msg
 
 
+def pad_message(blockedMsg):
+    newMsg = []
+    for block in blockedMsg:
+        if len(blockedMsg) < 16:
+            block = pad(block, 16)
+        newMsg.append(block)
+    return newMsg
+
+
+
 def verify(data, key, IV):
     pt = CBC_decrypt(data, key, IV)
     print(f"verify ct: {pt}")
@@ -102,6 +112,7 @@ def bit_flip(ct, origIn):
     msg = full_message(origIn)      # get original message with append and prepend
     msg = msg.encode('UTF-8')       # encode message to bytes
     msgBlocks = [msg[i:i + n] for i in range(0, len(msg), n)]   # split message to blocks
+    msgBlocks = pad_message(msgBlocks)      # pad message
     ctBytes = ctBlocks[0][0:13]         # first bytes from first block of ct(length of ;admin=true;)
     msgBytes = msgBlocks[1][0:13]       # first bytes from second block of pt(length of ;admin=true;)
     injectStr = ";admin=true;".encode('UTF-8')  # get bytes of injected string ;admin=true;
