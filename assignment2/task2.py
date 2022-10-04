@@ -2,7 +2,6 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from Crypto.Random import get_random_bytes
 import urllib.parse
-from base64 import b64decode
 from Crypto.Util.Padding import unpad
 
 
@@ -17,11 +16,6 @@ def write_image(data):
     file = open("CBC_encrypted.bmp", "wb")
     file.write(data)
     file.close()
-
-
-def encrypt_decrypt_block(data, key, IV):
-    ct = encrypt_block(data, key, IV)
-    decrypt_block(ct, key, IV)
 
 
 def byte_xor(ba1, ba2):
@@ -41,8 +35,8 @@ def encrypt_block(data, key, vector):
 
 def CBC_encrypt(body, key, IV):
     enc = b''
-    n = 16  # chunk length
-    blocks = [body[i:i + n] for i in range(0, len(body), n)]
+    n = 16  # block length
+    blocks = [body[i:i + n] for i in range(0, len(body), n)]    # split message to blocks
     for block in blocks:
         enc_block = encrypt_block(block, key, IV)
         IV = enc_block          # changes vector to encrypted ciphertext block
@@ -64,13 +58,16 @@ def decrypt_block(ct, key, vector):
 def CBC_decrypt(body, key, IV):
     dec = b''
     n = 16
-    blocks = [body[i:i + n] for i in range(0, len(body), n)]
+    blocks = [body[i:i + n] for i in range(0, len(body), n)]    # splits ciphertext to blocks
     for block in blocks:
         dec_block = decrypt_block(block, key, IV)   #decrypts current block
         IV = block          # changes vector to previous ciphertext block
-        if dec_block == blocks[-1]:
-            dec_block = unpad(dec_block, 16)
-        dec += dec_block
+        if block == blocks[-1]:         # unpad last block
+            try:
+                dec_block = unpad(dec_block, 16)
+            except ValueError:      # catches when no padding on last block
+                pass
+        dec += dec_block    # append decrypted blocks to output
     return dec
 
 
@@ -80,36 +77,51 @@ def parse_data(data):
     return data
 
 
-def submit(key, IV):
-    prepend = "userid=456;userdata="
-    append = ";session-id=31337"
-    data =input("What is your message? ")
-    data = parse_data(data)
-    data = prepend + data + append
+def submit(data, key, IV):
+    data = parse_data(data)     # url encode = and ;
+    data = full_message(data)   # append and prepend text
     ct = CBC_encrypt(data, key, IV)
     return ct
 
 
+def full_message(msg):
+    prepend = "userid=456;userdata="
+    append = ";session-id=31337"
+    msg = prepend + msg + append
+    return msg
+
+
 def verify(data, key, IV):
     pt = CBC_decrypt(data, key, IV)
-    print(pt)
-    return b';admin=true' in pt
+    print(f"verify ct: {pt}")
+    return b';admin=true;' in pt
 
-def bit_flip(ct):
-    n = 16
-    blocks = [ct[i:i + n] for i in range(0, len(ct), n)]
-
+def bit_flip(ct, origIn):
+    n = 16          # set block size
+    ctBlocks = [ct[i:i + n] for i in range(0, len(ct), n)]
+    msg = full_message(origIn)      # get original message with append and prepend
+    msg = msg.encode('UTF-8')       # encode message to bytes
+    msgBlocks = [msg[i:i + n] for i in range(0, len(msg), n)]   # split message to blocks
+    ctBytes = ctBlocks[0][0:13]         # first bytes from first block of ct(length of ;admin=true;)
+    msgBytes = msgBlocks[1][0:13]       # first bytes from second block of pt(length of ;admin=true;)
+    injectStr = ";admin=true;".encode('UTF-8')  # get bytes of injected string ;admin=true;
+    zeroOut = byte_xor(ctBytes, msgBytes)       # zeros out when xor in next block
+    injectCt = byte_xor(zeroOut, injectStr)     # xor zerod out bytes with injected bytes
+    ctBlockOne = ctBlocks[0]
+    ctBlocks[0] = injectCt + ctBlockOne[len(injectCt):]     # inject ct into first block
+    newCt = b''
+    for i in ctBlocks:      # create new ct with injected ct
+        newCt += i
+    return newCt
 
 
 if __name__ == '__main__':
     key = get_random_bytes(16)      # same key throughout whole program
     IV = get_random_bytes(16)       # same IV throughout whole program
-    # enc = CBC_encrypt(data, key, IV)
-    # print(f'encrypted string: {enc}')
-    # dec = CBC_decrypt(enc, key, IV)
-    # print(f'decrypted string: {dec}')
-    ct = submit(key, IV)
-    print(ct)
+    msg = input("What is your message? ")
+    ct = submit(msg, key, IV)
+    inject = bit_flip(ct, msg)      # get inject ct
     print(f'admin? {verify(ct, key, IV)}')
+    print(f'what about now? {verify(inject, key, IV)}')
 
 
