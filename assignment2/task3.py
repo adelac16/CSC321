@@ -5,13 +5,16 @@ import matplotlib.pyplot as plt
 # RSA ---------------------------------------------
 def rsa():
     x = [512,1024,2048,4096]
-    y = [17894.7,5226.2,906.8,120.4]
+    sign = [17894.7,5226.2,906.8,120.4]
+    verify = [139309.5, 54719.1, 16818.7, 4562.8]
 
-    plt.plot(x, y)
+    plt.plot(x, sign, label = "sign (encrypt)")
+    plt.plot(x, verify, label = "verify (decrypt)")
 
     plt.xlabel('key size (bits)')
-    plt.ylabel('thoroughput (signs/second)')
+    plt.ylabel('throughput (sign/verify per s)')
     plt.title('RSA Key Size vs. Thoroughput')
+    plt.legend(loc='best')
     plt.show()
 
 # AES-128 ---------------------------------------------
@@ -22,7 +25,7 @@ def aes_cbc():
     plt.plot(x, y)
 
     plt.xlabel('block size (bytes)')
-    plt.ylabel('thoroughput (bytes/second, 1000\'s)')
+    plt.ylabel('throughput (bytes/second, 1000\'s)')
     plt.title('AES_128 Block Size vs. Thoroughput (CBC)')
     plt.show()
 
