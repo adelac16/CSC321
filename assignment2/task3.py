@@ -27,5 +27,5 @@ def aes_cbc():
     plt.show()
 
 if __name__=='__main__':
-    aes_cbc()
+    #aes_cbc()
     rsa()

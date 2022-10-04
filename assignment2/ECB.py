@@ -37,8 +37,8 @@ def write_image(data):
 def encrypt_block(data, key):
     if type(data) != bytes:             # checks if data is already bytes
         data = data.encode('UTF-8')     # converts data to bytes
-    if len(block)<16:                   # checks for incomplete block
-            block = pad(block, 16, style='pkcs7')   # pads
+    if len(data)<16:                   # checks for incomplete block
+            data = pad(data, 16, style='pkcs7')   # pads
     cipher = AES.new(key, AES.MODE_ECB)
     ct_bytes = cipher.encrypt(data)
     return ct_bytes
